@@ -1,3 +1,5 @@
+const timeoutDuration = 5000;
+
 export default function apiCall(route, body = {}, method = "GET") {
   // request promise
   const request = new Promise((resolve, reject) => {
@@ -11,5 +13,34 @@ export default function apiCall(route, body = {}, method = "GET") {
       mode: "cors",
       headers
     };
+
+    // Check to see if request is not a GET request
+    if (method !== "GET") requestDetails.body = JSON.stringify(body);
+
+    // handleErrors function
+    function handleErrors(response) {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw Error(response.statusText);
+      }
+    }
+
+    // construct fetch request
+    fetch(`${SERVER_URL}/${route}`, requestDetails)
+      .then(handleErrors)
+      .then(resolve)
+      .catch(reject);
+  });
+
+  // timeout promise
+  const timeout = new Promise((request, reject) => {
+    setTimeout(reject, timeoutDuration, `Request timed out!`);
+  });
+
+  return new Promise((resolve, reject) => {
+    Promise.race([request, timeout])
+      .then(resolve)
+      .catch(reject);
   });
 }

@@ -1,5 +1,8 @@
 import "./general";
 import validateRegistrationForm from "./services/formValidation/validateRegistraionForm";
+import apiCall from "./services/api/apiCall";
+import toastr from "toastr";
+import "../../node_modules/toastr/toastr.less";
 
 // Create Home class
 class Home {
@@ -82,7 +85,35 @@ class Home {
   }
 
   // submitForm method
-  submitForm(formValues) {}
+  submitForm(formValues) {
+    this.$submit.classList.add("hidden");
+    this.$loadingIndicator.classList.remove("hidden");
+
+    // api call upon form submit
+    apiCall("registration", formValues, "POST")
+      .then(response => {
+        this.$submit.classList.remove("hidden");
+        this.$loadingIndicator.classList.add("hidden");
+        toastr.success(response.message);
+        this.resetForm();
+      })
+      .catch(() => {
+        this.$submit.classList.remove("hidden");
+        this.$loadingIndicator.classList.add("hidden");
+        toastr.error("Error!");
+      });
+  }
+
+  // reset the form
+  resetForm() {
+    this.$username.value = "";
+    this.$email.value = "";
+    this.$phone.value = "";
+    this.$age.value = "";
+    this.$profession.value = "school";
+    this.$experience.checked = true;
+    this.$comment.value = "";
+  }
 }
 
 window.addEventListener("load", () => {
